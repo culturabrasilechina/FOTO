@@ -35,47 +35,33 @@ document.getElementById('upload').onchange = function (e) {
     reader.onload = function (event) {
         const img = new Image();
 
-        img.onload = async function () {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        img.onload = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    let sx, sy, cropSize;
+            // ===== 核心：自动居中裁剪（不变形） =====
+            let cropSize;
+            let sx, sy;
 
-    // 人脸检测
-    const detection = await faceapi.detectSingleFace(
-        img,
-        new faceapi.TinyFaceDetectorOptions()
-    );
+            if (img.width > img.height) {
+                cropSize = img.height;
+                sx = (img.width - cropSize) / 2;
+                sy = 0;
+            } else {
+                cropSize = img.width;
+                sx = 0;
+                sy = (img.height - cropSize) / 2;
+            }
 
-    if (detection) {
-        const box = detection.box;
+            ctx.drawImage(
+                img,
+                sx, sy, cropSize, cropSize, // 裁剪区域
+                150, 200, 500, 500          // 放置位置
+            );
 
-        // 以脸为中心，裁正方形
-        const faceCenterX = box.x + box.width / 2;
-        const faceCenterY = box.y + box.height / 2;
+            // 再盖上模板
+            ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
+        };
 
-        cropSize = Math.max(box.width, box.height) * 2;
-
-        sx = faceCenterX - cropSize / 2;
-        sy = faceCenterY - cropSize / 2;
-
-        // 防止裁剪超出图片边界
-        sx = Math.max(0, Math.min(sx, img.width - cropSize));
-        sy = Math.max(0, Math.min(sy, img.height - cropSize));
-    } else {
-        // 没检测到脸，退回居中裁剪
-        cropSize = Math.min(img.width, img.height);
-        sx = (img.width - cropSize) / 2;
-        sy = (img.height - cropSize) / 2;
-    }
-
-    ctx.drawImage(
-        img,
-        sx, sy, cropSize, cropSize,
-        150, 200, 500, 500
-    );
-
-    ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
-};
         img.src = event.target.result;
     };
 
@@ -92,5 +78,6 @@ function download() {
 
 </body>
 </html>
+
 
 
