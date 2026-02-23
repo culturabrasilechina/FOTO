@@ -1,58 +1,57 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Baixar Foto</title>
-<style>
-body { text-align:center; font-family:Arial; }
-canvas { border:1px solid #ccc; margin-top:20px; }
-button { padding:10px 20px; margin-top:20px; }
-</style>
-</head>
-<body>
-
-<h2>Enviar Foto</h2>
-<input type="file" id="upload" accept="image/*">
-<br>
-<canvas id="canvas" width="800" height="1000"></canvas>
-<br>
-<button onclick="download()">Baixar Foto</button>
-
 <script>
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const template = new Image();
-template.src = "template.png";  // 你的模板文件名
+template.src = "template.png";
 
-template.onload = function() {
+template.onload = function () {
     ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
 };
 
-document.getElementById('upload').onchange = function(e) {
+document.getElementById('upload').onchange = function (e) {
     const reader = new FileReader();
-    reader.onload = function(event) {
+
+    reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.drawImage(img, 150, 200, 500, 500); 
+
+        img.onload = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // ===== 核心：自动居中裁剪（不变形） =====
+            let cropSize;
+            let sx, sy;
+
+            if (img.width > img.height) {
+                cropSize = img.height;
+                sx = (img.width - cropSize) / 2;
+                sy = 0;
+            } else {
+                cropSize = img.width;
+                sx = 0;
+                sy = (img.height - cropSize) / 2;
+            }
+
+            ctx.drawImage(
+                img,
+                sx, sy, cropSize, cropSize, // 裁剪区域
+                150, 200, 500, 500          // 放置位置
+            );
+
+            // 再盖上模板
             ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
-        }
+        };
+
         img.src = event.target.result;
-    }
+    };
+
     reader.readAsDataURL(e.target.files[0]);
-}
+};
 
 function download() {
     const link = document.createElement('a');
     link.download = 'diy-photo.png';
-    link.href = canvas.toDataURL();
+    link.href = canvas.toDataURL('image/png');
     link.click();
 }
 </script>
-
-</body>
-</html>
-
-
-
