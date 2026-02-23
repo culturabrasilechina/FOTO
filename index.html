@@ -40,7 +40,7 @@ document.getElementById('upload').onchange = function (e) {
 
     let sx, sy, cropSize;
 
-    // 🔍 人脸检测
+    // 人脸检测
     const detection = await faceapi.detectSingleFace(
         img,
         new faceapi.TinyFaceDetectorOptions()
@@ -62,7 +62,7 @@ document.getElementById('upload').onchange = function (e) {
         sx = Math.max(0, Math.min(sx, img.width - cropSize));
         sy = Math.max(0, Math.min(sy, img.height - cropSize));
     } else {
-        // ❗没检测到脸，退回居中裁剪
+        // 没检测到脸，退回居中裁剪
         cropSize = Math.min(img.width, img.height);
         sx = (img.width - cropSize) / 2;
         sy = (img.height - cropSize) / 2;
@@ -92,4 +92,5 @@ function download() {
 
 </body>
 </html>
+
 
